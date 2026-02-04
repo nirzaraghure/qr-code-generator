@@ -1,29 +1,24 @@
 ```javascript
 function generateQR() {
-    const input = document.getElementById("text").value;
+    const input = document.getElementById("text").value.trim();
     const qrCodeDiv = document.getElementById("qrcode");
 
-    qrCodeDiv.innerHTML = "";
+    if (input === "") {
+        alert("Please enter text or URL");
+        return;
+    }
 
     try {
-        if (input.trim() === "") {
-            alert("Please enter text or URL");
-            return;
-        }
-
-        // Validate user input
         if (typeof input !== "string") {
             throw new Error("Input must be a string");
         }
 
-        // Create a new QRCode object using UTF-8 encoding
         const qrCode = new QRCode(qrCodeDiv, {
             text: input,
             width: 200,
             height: 200
         });
 
-        // Handle errors when creating the QRCode object
         if (!qrCode) {
             throw new Error("Failed to create QRCode object");
         }
@@ -33,6 +28,5 @@ function generateQR() {
     }
 }
 
-// Added event listener to the button to call the generateQR function
 document.getElementById("generateButton").addEventListener("click", generateQR);
 ```
