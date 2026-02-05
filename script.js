@@ -13,15 +13,11 @@ function generateQR() {
     }
 
     try {
-        const qrCode = new QRCode(qrCodeDiv, {
+        const qrcode = new QRCode(qrCodeDiv, {
             text: input,
             width: 200,
             height: 200
         });
-
-        if (!qrCode) {
-            throw new Error("Failed to create QRCode object");
-        }
     } catch (error) {
         console.error(error);
         alert("An error occurred while generating the QR code");
