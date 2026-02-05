@@ -8,11 +8,11 @@ function generateQR() {
         return;
     }
 
-    try {
-        if (typeof input !== "string") {
-            throw new Error("Input must be a string");
-        }
+    if (typeof input !== "string") {
+        throw new Error("Input must be a string");
+    }
 
+    try {
         const qrCode = new QRCode(qrCodeDiv, {
             text: input,
             width: 200,
