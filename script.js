@@ -1,4 +1,7 @@
 ```javascript
+// QRCode library
+const QRCode = require('qrcode');
+
 function generateQR() {
     const input = document.getElementById("text").value.trim();
     const qrCodeDiv = document.getElementById("qrcode");
@@ -13,15 +16,18 @@ function generateQR() {
             throw new Error("Input must be a string");
         }
 
-        const qrCode = new QRCode(qrCodeDiv, {
-            text: input,
+        QRCode.toDataURL(input, {
             width: 200,
             height: 200
+        }, (err, url) => {
+            if (err) {
+                throw err;
+            }
+            const img = document.createElement('img');
+            img.src = url;
+            qrCodeDiv.innerHTML = "";
+            qrCodeDiv.appendChild(img);
         });
-
-        if (!qrCode) {
-            throw new Error("Failed to create QRCode object");
-        }
     } catch (error) {
         console.error(error);
         alert("An error occurred while generating the QR code");
