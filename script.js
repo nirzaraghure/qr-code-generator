@@ -1,20 +1,20 @@
 ```javascript
 function generateQR() {
-    const input = document.getElementById("text").value.trim();
+    const inputElement = document.getElementById("text");
     const qrCodeDiv = document.getElementById("qrcode");
 
-    if (input === "") {
+    if (inputElement.value.trim() === "") {
         alert("Please enter text or URL");
         return;
     }
 
-    if (typeof input !== "string") {
+    if (typeof inputElement.value !== "string") {
         throw new Error("Input must be a string");
     }
 
     try {
-        const qrcode = new QRCode(qrCodeDiv, {
-            text: input,
+        new QRCode(qrCodeDiv, {
+            text: inputElement.value,
             width: 200,
             height: 200
         });
