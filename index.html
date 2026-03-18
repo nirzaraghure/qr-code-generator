@@ -1,62 +1,47 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Maker</title>
 </head>
 
 <body>
 
 <div class="qr-wrapper">
-
     <h2>Create QR Code</h2>
     <p>Type any text, link, or contact information to create a QR code.</p>
-
-    <label>Input Text or URL:</label>
-    <input type="text" id="qrInput" placeholder="Paste link or text here..." />
-
+    <label for="qrInput">Input Text or URL:</label>
+    <input type="text" id="qrInput" placeholder="Paste link or text here..." required>
     <button id="createBtn">Create QR</button>
-
     <div id="qrOutput"></div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
 <script>
+    const qrInput = document.getElementById("qrInput");
+    const createBtn = document.getElementById("createBtn");
+    const qrOutput = document.getElementById("qrOutput");
 
-let qrInstance;
+    createBtn.addEventListener("click", createQRCode);
 
-document.getElementById("createBtn").addEventListener("click", function () {
-
-    const value = document.getElementById("qrInput").value.trim();
-    const container = document.getElementById("qrOutput");
-
-    container.innerHTML = "";
-
-    if (value === "") {
-        alert("Please enter some text or URL");
-        return;
+    function createQRCode() {
+        const value = qrInput.value.trim();
+        if (value === "") {
+            alert("Please enter some text or URL");
+            return;
+        }
+        qrOutput.innerHTML = "";
+        qrInstance = new QRCode(qrOutput, {
+            text: value,
+            width: 200,
+            height: 200
+        });
     }
-
-    qrInstance = new QRCode(container, {
-        text: value,
-        width: 200,
-        height: 200
-    });
-
-});
-
 </script>
 
 </body>
-</html>```
-
-**Changes:**
-
-1. **Added `required` attribute**: Ensures that the user enters some input before clicking the Generate button.
-2. **Added `label` element**: Improves accessibility by providing a clear label for the input field.
-3. **Added `meta` tags**: Includes the viewport meta tag for responsive design and the character encoding meta tag for proper character rendering.
-
-Please note that these changes are just suggestions, and you may need to adapt them to your specific requirements.
+</html>
+```
