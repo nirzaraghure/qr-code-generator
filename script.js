@@ -3,7 +3,7 @@ function generateQR() {
     const inputElement = document.getElementById("text");
     const qrCodeDiv = document.getElementById("qrcode");
 
-    if (inputElement.value.trim() === "") {
+    if (!inputElement.value.trim()) {
         alert("Please enter text or URL");
         return;
     }
@@ -18,6 +18,8 @@ function generateQR() {
             width: 200,
             height: 200
         });
+        // Remove any existing QR code if it already exists in the div
+        qrCodeDiv.innerHTML = '';
     } catch (error) {
         console.error(error);
         alert("An error occurred while generating the QR code");
