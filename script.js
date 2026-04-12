@@ -1,7 +1,8 @@
 ```javascript
-function generateQR() {
-    const inputElement = document.getElementById("text");
-    const qrCodeDiv = document.getElementById("qrcode");
+function generateQR(inputElement, qrCodeDiv) {
+    if (!inputElement || !qrCodeDiv) {
+        throw new Error("Invalid input elements");
+    }
 
     if (inputElement.value.trim() === "") {
         alert("Please enter text or URL");
@@ -24,5 +25,9 @@ function generateQR() {
     }
 }
 
-document.getElementById("generateButton").addEventListener("click", () => generateQR());
+document.getElementById("generateButton").addEventListener("click", () => {
+    const inputElement = document.getElementById("text");
+    const qrCodeDiv = document.getElementById("qrcode");
+    generateQR(inputElement, qrCodeDiv);
+});
 ```
