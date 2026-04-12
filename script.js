@@ -3,7 +3,7 @@ function generateQR() {
     const inputElement = document.getElementById("text");
     const qrCodeDiv = document.getElementById("qrcode");
 
-    if (inputElement.value.trim() === "") {
+    if (!inputElement.value.trim()) {
         alert("Please enter text or URL");
         return;
     }
@@ -13,7 +13,7 @@ function generateQR() {
     }
 
     try {
-        const qrcode = new QRCode(qrCodeDiv, {
+        new QRCode(qrCodeDiv, {
             text: inputElement.value,
             width: 200,
             height: 200
@@ -24,5 +24,5 @@ function generateQR() {
     }
 }
 
-document.getElementById("generateButton").addEventListener("click", () => generateQR());
+document.getElementById("generateButton").addEventListener("click", generateQR);
 ```
