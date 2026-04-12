@@ -1,7 +1,12 @@
 ```javascript
-function generateQR() {
-    const inputElement = document.getElementById("text");
-    const qrCodeDiv = document.getElementById("qrcode");
+function generateQR(inputElement, qrCodeDiv = null) {
+    if (!inputElement || !qrCodeDiv) {
+        throw new Error("Invalid input elements");
+    }
+
+    if (!qrCodeDiv) {
+        qrCodeDiv = document.getElementById("qrcode");
+    }
 
     if (inputElement.value.trim() === "") {
         alert("Please enter text or URL");
@@ -24,5 +29,9 @@ function generateQR() {
     }
 }
 
-document.getElementById("generateButton").addEventListener("click", () => generateQR());
+document.getElementById("generateButton").addEventListener("click", () => {
+    const inputElement = document.getElementById("text");
+    const qrCodeDiv = document.getElementById("qrcode");
+    generateQR(inputElement, qrCodeDiv);
+});
 ```
