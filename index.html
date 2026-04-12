@@ -1,9 +1,21 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Maker</title>
+    <style>
+        /* Basic styling for the QR code */
+        .qr-wrapper {
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+    </style>
 </head>
 
 <body>
@@ -13,10 +25,10 @@
     <h2>Create QR Code</h2>
     <p>Type any text, link, or contact information to create a QR code.</p>
 
-    <label>Input Text or URL:</label>
-    <input type="text" id="qrInput" placeholder="Paste link or text here..." />
+    <label for="qrInput">Input Text or URL:</label>
+    <input type="text" id="qrInput" placeholder="Paste link or text here..." required />
 
-    <button id="createBtn">Create QR</button>
+    <button id="createBtn" disabled>Create QR</button>
 
     <div id="qrOutput"></div>
 
@@ -25,38 +37,42 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
 <script>
+    let qrInstance;
 
-let qrInstance;
+    // Get the input element and output element
+    const qrInput = document.getElementById("qrInput");
+    const createBtn = document.getElementById("createBtn");
+    const qrOutput = document.getElementById("qrOutput");
 
-document.getElementById("createBtn").addEventListener("click", function () {
-
-    const value = document.getElementById("qrInput").value.trim();
-    const container = document.getElementById("qrOutput");
-
-    container.innerHTML = "";
-
-    if (value === "") {
-        alert("Please enter some text or URL");
-        return;
-    }
-
-    qrInstance = new QRCode(container, {
-        text: value,
-        width: 200,
-        height: 200
+    // Add event listener to the input element
+    qrInput.addEventListener("input", function () {
+        const value = qrInput.value.trim();
+        createBtn.disabled = value === "";
     });
 
-});
+    // Add event listener to the create button
+    createBtn.addEventListener("click", function () {
+        const value = qrInput.value.trim();
+        qrOutput.innerHTML = "";
 
+        if (value === "") {
+            alert("Please enter some text or URL");
+            return;
+        }
+
+        qrInstance = new QRCode(qrOutput, {
+            text: value,
+            width: 200,
+            height: 200
+        });
+
+        qrInput.focus();
+    });
+
+    // Disable the create button initially
+    createBtn.disabled = true;
 </script>
 
 </body>
-</html>```
-
-**Changes:**
-
-1. **Added `required` attribute**: Ensures that the user enters some input before clicking the Generate button.
-2. **Added `label` element**: Improves accessibility by providing a clear label for the input field.
-3. **Added `meta` tags**: Includes the viewport meta tag for responsive design and the character encoding meta tag for proper character rendering.
-
-Please note that these changes are just suggestions, and you may need to adapt them to your specific requirements.
+</html>
+```
