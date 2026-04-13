@@ -1,28 +1,40 @@
 ```javascript
-function generateQR() {
-    const inputElement = document.getElementById("text");
-    const qrCodeDiv = document.getElementById("qrcode");
+// Get HTML elements
+const inputElement = document.getElementById("text");
+const qrCodeDiv = document.getElementById("qrcode");
+const generateButton = document.getElementById("generateButton");
 
-    if (inputElement.value.trim() === "") {
-        alert("Please enter text or URL");
-        return;
-    }
+// Validate input on input change
+inputElement.addEventListener("input", () => {
+    const isValid = inputElement.value.trim() && typeof inputElement.value === "string";
+    generateButton.disabled = !isValid;
+});
 
-    if (typeof inputElement.value !== "string") {
-        throw new Error("Input must be a string");
-    }
+// Add event listener for button click
+generateButton.addEventListener("click", () => {
+    generateQR(inputElement.value);
+});
 
+// Function to generate QR code
+function generateQR(text) {
     try {
-        const qrcode = new QRCode(qrCodeDiv, {
-            text: inputElement.value,
+        // Validate input
+        if (!text.trim()) {
+            throw new Error("Please enter text or URL");
+        }
+        if (typeof text !== "string") {
+            throw new Error("Input must be a string");
+        }
+
+        // Create QR code
+        new QRCode(qrCodeDiv, {
+            text,
             width: 200,
             height: 200
         });
     } catch (error) {
         console.error(error);
-        alert("An error occurred while generating the QR code");
+        alert(`An error occurred: ${error.message}`);
     }
 }
-
-document.getElementById("generateButton").addEventListener("click", () => generateQR());
 ```
