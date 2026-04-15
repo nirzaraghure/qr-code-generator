@@ -1,28 +1,27 @@
-```javascript
-function generateQR() {
-    const inputElement = document.getElementById("text");
-    const qrCodeDiv = document.getElementById("qrcode");
+Here is your merged code:
 
-    if (inputElement.value.trim() === "") {
+```javascript
+// Get HTML elements
+const inputElement = document.getElementById("text");
+const qrCodeDiv = document.getElementById("qrcode");
+const generateButton = document.getElementById("generateButton");
+
+// Validate input and generate QR code on button click
+generateButton.addEventListener("click", () => {
+    if (inputElement.value.trim() === '') {
         alert("Please enter text or URL");
         return;
     }
 
     if (typeof inputElement.value !== "string") {
-        throw new Error("Input must be a string");
+        alert("Input must be a string");
+        return;
     }
 
-    try {
-        const qrcode = new QRCode(qrCodeDiv, {
-            text: inputElement.value,
-            width: 200,
-            height: 200
-        });
-    } catch (error) {
-        console.error(error);
-        alert("An error occurred while generating the QR code");
-    }
-}
-
-document.getElementById("generateButton").addEventListener("click", () => generateQR());
+    const qrCode = new QRCode(qrCodeDiv, {
+        text: inputElement.value,
+        width: 200,
+        height: 200
+    });
+});
 ```
