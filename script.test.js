@@ -1,44 +1,136 @@
-Sure, here is an example of how you can write tests for your JavaScript function `generateQR` using Jest as a testing framework. 
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const test = require('node:test');
+const vm = require('node:vm');
 
-const { QRCode } = require('qrcode'); // replace this with the actual path to qrcode module
+const scriptSource = fs.readFileSync(path.join(__dirname, 'script.js'), 'utf8');
 
-// Mocking document and its methods
-global.document = document;
-global.getElementById = jest.fn();
-global.alert = jest.fn();
-global.console.error = jest.fn();
+class MockElement {
+    constructor(tagName, id = null) {
+        this.tagName = tagName.toUpperCase();
+        this.id = id;
+        this.value = '';
+        this.children = [];
+        this.listeners = {};
+        this._innerHTML = '';
+        this.focused = false;
+    }
 
-describe('generateQR', () => {
-    beforeEach(() => {
-        // Resetting mock function calls
-        global.document.getElementById.mockClear();
-        global.alert.mockClear();
-        global.console.error.mockClear();
-        
-        // Mocking QRCode constructor
-        global.QRCode = jest.fn(() => ({}));
-    });
-    
-    it('should throw an error if input is not a string', () => {
-        global.document.getElementById.mockReturnValue({ value: 123456 }); // Non-string input
-        
-        expect(() => generateQR()).toThrow("Input must be a string");
-    });
-    
-    it('should show an alert if no text or URL is entered', () => {
-        global.document.getElementById.mockReturnValue({ value: "" }); // Empty input
-        
-        generateQR();
-        
-        expect(global.alert).toHaveBeenCalledWith("Please enter text or URL");
-    });
-    
-    it('should create a QR code with valid inputs', () => {
-        global.document.getElementById.mockReturnValue({ value: "test" }).mockImplementationOnce(() => ({value: ""})); // Valid input
-        
-        generateQR();
-        
-        expect(global.QRCode).toHaveBeenCalledWith(expect.anything(), { text: 'test', width: 200, height: 200 });
-    });
+    appendChild(child) {
+        this.children.push(child);
+        return child;
+    }
+
+    addEventListener(type, handler) {
+        if (!this.listeners[type]) {
+            this.listeners[type] = [];
+        }
+        this.listeners[type].push(handler);
+    }
+
+    click() {
+        this.dispatchEvent('click');
+    }
+
+    dispatchEvent(type, event = {}) {
+        (this.listeners[type] || []).forEach((handler) => handler({ target: this, ...event }));
+    }
+
+    focus() {
+        this.focused = true;
+    }
+
+    set innerHTML(value) {
+        this._innerHTML = value;
+        this.children = [];
+    }
+
+    get innerHTML() {
+        return this._innerHTML;
+    }
+}
+
+class MockDocument {
+    constructor() {
+        this.nodesById = new Map();
+    }
+
+    registerElement(element) {
+        if (element.id) {
+            this.nodesById.set(element.id, element);
+        }
+        return element;
+    }
+
+    getElementById(id) {
+        return this.nodesById.get(id);
+    }
+}
+
+function setup() {
+    const document = new MockDocument();
+    const qrInput = document.registerElement(new MockElement('input', 'qrInput'));
+    const qrOutput = document.registerElement(new MockElement('div', 'qrOutput'));
+    const createBtn = document.registerElement(new MockElement('button', 'createBtn'));
+
+    const alerts = [];
+    const errors = [];
+    const qrCalls = [];
+
+    function QRCode(container, options) {
+        qrCalls.push({ container, options });
+        container.appendChild(new MockElement('canvas'));
+    }
+
+    const context = {
+        document,
+        window: {},
+        alert: (message) => alerts.push(message),
+        console: { error: (err) => errors.push(err) },
+        QRCode,
+    };
+
+    context.window.document = document;
+
+    vm.createContext(context);
+    vm.runInContext(scriptSource, context);
+
+    const generateQR = context.window.generateQR;
+
+    return { qrInput, qrOutput, createBtn, alerts, errors, qrCalls, generateQR };
+}
+
+test('generateQR alerts when no value is provided', () => {
+    const env = setup();
+    env.qrInput.value = '   ';
+
+    env.generateQR();
+
+    assert.deepEqual(env.alerts, ['Please enter some text or URL']);
+    assert.equal(env.qrCalls.length, 0);
+    assert.equal(env.qrOutput.innerHTML, '');
 });
-Please note that you'll need to replace `require('qrcode')` with the actual path to your qrcode module if it differs from this example. This code also assumes that Jest is being used as a testing framework and has been properly set up for JavaScript projects. The mocks are created using `jest.fn()` to simulate different scenarios like an empty input, non-string inputs etc., which will allow you to test the edge cases of your function.
+
+test('generateQR trims input and initializes QRCode', () => {
+    const env = setup();
+    env.qrInput.value = '  https://example.com  ';
+
+    env.generateQR();
+
+    assert.equal(env.alerts.length, 0);
+    assert.equal(env.qrCalls.length, 1);
+    assert.equal(env.qrCalls[0].options.text, 'https://example.com');
+    assert.equal(env.qrCalls[0].options.width, 200);
+    assert.equal(env.qrCalls[0].options.height, 200);
+    assert.equal(env.qrOutput.children.length, 1);
+});
+
+test('clicking the button calls generateQR', () => {
+    const env = setup();
+    env.qrInput.value = 'value';
+
+    env.createBtn.click();
+
+    assert.equal(env.qrCalls.length, 1);
+});
