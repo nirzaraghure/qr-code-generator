@@ -1,10 +1,10 @@
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Maker</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
@@ -15,9 +15,38 @@
     <p>Type any text, link, or contact information to create a QR code.</p>
 
     <label for="qrInput">Input Text or URL:</label>
-    <input type="text" id="qrInput" placeholder="Paste link or text here..." required />
+    <input type="text" id="qrInput" placeholder="Paste link or text here..." />
 
-    <button id="createBtn">Create QR</button>
+    <div class="options">
+        <label for="qrSize">Size:</label>
+        <select id="qrSize">
+            <option value="128">128 x 128</option>
+            <option value="200" selected>200 x 200</option>
+            <option value="256">256 x 256</option>
+            <option value="300">300 x 300</option>
+            <option value="400">400 x 400</option>
+        </select>
+
+        <label for="qrColor">Color:</label>
+        <input type="color" id="qrColor" value="#000000">
+
+        <label for="qrBgColor">Background:</label>
+        <input type="color" id="qrBgColor" value="#ffffff">
+
+        <label for="qrLevel">Error Correction:</label>
+        <select id="qrLevel">
+            <option value="L">Low (7%)</option>
+            <option value="M" selected>Medium (15%)</option>
+            <option value="Q">Quartile (25%)</option>
+            <option value="H">High (30%)</option>
+        </select>
+    </div>
+
+    <div class="buttons">
+        <button id="createBtn">Create QR</button>
+        <button id="clearBtn">Clear</button>
+        <button id="downloadBtn" disabled>Download</button>
+    </div>
 
     <div id="qrOutput"></div>
 
@@ -26,31 +55,108 @@
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
 
 <script>
-let qrInstance;
+let qrInstance = null;
 
-document.getElementById("createBtn").addEventListener("click", function () {
+const qrInput = document.getElementById("qrInput");
+const qrOutput = document.getElementById("qrOutput");
+const createBtn = document.getElementById("createBtn");
+const clearBtn = document.getElementById("clearBtn");
+const downloadBtn = document.getElementById("downloadBtn");
+const qrSize = document.getElementById("qrSize");
+const qrColor = document.getElementById("qrColor");
+const qrBgColor = document.getElementById("qrBgColor");
+const qrLevel = document.getElementById("qrLevel");
 
-    const value = document.getElementById("qrInput").value.trim();
-    const container = document.getElementById("qrOutput");
-
-    container.innerHTML = "";
-
+// Generate QR Code
+function generateQR() {
+    const value = qrInput.value.trim();
+    
     if (value === "") {
-        alert("Please enter some text or URL");
-        document.getElementById("qrInput").focus();
+        qrOutput.innerHTML = '<p class="placeholder">Enter text or URL to generate QR code</p>';
+        downloadBtn.disabled = true;
         return;
     }
 
-    qrInstance = new QRCode(container, {
+    qrOutput.innerHTML = "";
+
+    const size = parseInt(qrSize.value);
+    
+    qrInstance = new QRCode(qrOutput, {
         text: value,
-        width: 200,
-        height: 200
+        width: size,
+        height: size,
+        colorDark: qrColor.value,
+        colorLight: qrBgColor.value,
+        correctLevel: QRCode.CorrectLevel[qrLevel.value]
     });
 
+    downloadBtn.disabled = false;
+}
+
+// Clear input and QR code
+function clearQR() {
+    qrInput.value = "";
+    qrOutput.innerHTML = '<p class="placeholder">Enter text or URL to generate QR code</p>';
+    downloadBtn.disabled = true;
+    qrInstance = null;
+}
+
+// Download QR Code as image
+function downloadQR() {
+    const canvas = qrOutput.querySelector("canvas");
+    if (canvas) {
+        const link = document.createElement("a");
+        link.download = "qrcode.png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    } else {
+        // Fallback for img element
+        const img = qrOutput.querySelector("img");
+        if (img) {
+            const link = document.createElement("a");
+            link.download = "qrcode.png";
+            link.href = img.src;
+            link.click();
+        }
+    }
+}
+
+// Event Listeners
+createBtn.addEventListener("click", generateQR);
+
+// Generate on Enter key
+qrInput.addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        generateQR();
+    }
 });
 
+// Real-time generation (debounced)
+let debounceTimer;
+qrInput.addEventListener("input", function() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+        if (qrInput.value.trim() !== "") {
+            generateQR();
+        }
+    }, 500);
+});
+
+// Update QR when options change
+[qrSize, qrColor, qrBgColor, qrLevel].forEach(element => {
+    element.addEventListener("change", function() {
+        if (qrInput.value.trim() !== "") {
+            generateQR();
+        }
+    });
+});
+
+clearBtn.addEventListener("click", clearQR);
+downloadBtn.addEventListener("click", downloadQR);
+
+// Initialize with placeholder
+clearQR();
 </script>
 
 </body>
 </html>
-```
